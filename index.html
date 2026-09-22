@@ -37,6 +37,7 @@
   }
 
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body {
     margin: 0;
     background: var(--paper);
@@ -127,6 +128,23 @@
   .box b { display: block; font: 400 20px/1.1 "Young Serif", Georgia, serif; color: var(--ink); }
   .box span { font-size: 11px; color: var(--muted); }
 
+  .typeform { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .typeform input {
+    font: 700 24px/1.2 "Caveat", cursive; color: var(--ink); background: var(--paper);
+    border: 1px solid var(--line-strong); border-bottom: 2px solid var(--ink); border-radius: 8px; padding: 8px 12px; min-width: 0; width: 100%;
+  }
+  .typeform input:focus { outline: 2px solid var(--margin); outline-offset: 1px; }
+  .primary { background: var(--ink); color: var(--paper); border: 1px solid var(--ink); border-radius: 8px; padding: 10px 16px; font: 600 14px/1 "Figtree", sans-serif; cursor: pointer; }
+  .feedback { border-radius: 10px; padding: 12px 14px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; font-size: 14px; }
+  .feedback.ok { background: var(--good-bg); color: var(--good); }
+  .feedback.no { background: var(--again-bg); color: var(--again); }
+  .feedback b { font-weight: 600; }
+  .accents { display: flex; flex-wrap: wrap; gap: 4px; }
+  .accents button { border: 1px solid var(--line-strong); background: var(--paper-2); color: var(--text); border-radius: 6px; min-width: 32px; padding: 6px 8px; font: 500 15px/1 "Figtree", sans-serif; cursor: pointer; }
+  .streak { display: inline-flex; align-items: baseline; gap: 6px; }
+  .streak b { font: 700 26px/1 "Caveat", cursive; color: var(--margin); }
+  .streak.bump b { animation: bump .35s ease; }
+  @keyframes bump { 50% { transform: scale(1.35); } }
   .done { text-align: center; padding: 40px 16px; border: 1px dashed var(--line-strong); border-radius: 10px; display: grid; gap: 10px; justify-items: center; }
   .done h2 { font: 700 38px/1 "Caveat", cursive; color: var(--ink); margin: 0; }
   .done p { margin: 0; color: var(--muted); max-width: 44ch; }
@@ -148,7 +166,10 @@
 <div class="wrap">
   <header>
     <h1>Cahier de <em>français</em></h1>
-    <div class="stats" id="stats"></div>
+    <div style="display:flex;gap:16px;align-items:baseline;flex-wrap:wrap">
+      <div class="streak" id="streak" aria-live="polite"></div>
+      <div class="stats" id="stats"></div>
+    </div>
   </header>
 
   <section style="display:grid;gap:10px">
@@ -160,6 +181,10 @@
     <div class="toggle" role="group" aria-label="Direction">
       <button id="dirFr" aria-pressed="true">Français → English</button>
       <button id="dirEn" aria-pressed="false">English → Français</button>
+    </div>
+    <div class="toggle" role="group" aria-label="Mode">
+      <button id="modeFlip" aria-pressed="true">Flip cards</button>
+      <button id="modeType" aria-pressed="false">Type the answer</button>
     </div>
     <div style="display:flex;gap:8px">
       <button class="ghost" id="shuffle">Shuffle</button>
@@ -176,7 +201,15 @@
         <div class="face back" id="back"></div>
       </button>
     </div>
-    <div class="answer">
+    <div id="typeArea" hidden style="display:grid;gap:8px">
+      <form class="typeform" id="typeForm" autocomplete="off">
+        <input id="guess" type="text" aria-label="Your answer" placeholder="Écrivez ici…" spellcheck="false" autocapitalize="off">
+        <button class="primary" type="submit" id="check">Check</button>
+      </form>
+      <div class="accents" id="accents" aria-label="Insert accented letter"></div>
+      <div class="feedback" id="feedback" hidden></div>
+    </div>
+    <div class="answer" id="flipArea">
       <button class="again" id="again" disabled>À revoir<small>Show me again · <kbd>1</kbd></small></button>
       <button class="know" id="know" disabled>Je sais !<small>Move it up a box · <kbd>2</kbd></small></button>
     </div>
@@ -249,6 +282,30 @@
       ["savoir", "to know (a fact)", "", "Je ne sais pas.", "I don't know."],
       ["prendre", "to take", "", "Je prends le métro.", "I take the metro."],
     ],
+    "Couleurs": [
+      ["rouge", "red", "", "Une robe rouge.", "A red dress."],
+      ["bleu", "blue", "", "Le ciel est bleu.", "The sky is blue."],
+      ["vert", "green", "", "Des yeux verts.", "Green eyes."],
+      ["jaune", "yellow", "", "Un taxi jaune.", "A yellow taxi."],
+      ["noir", "black", "", "Un café noir.", "A black coffee."],
+      ["blanc", "white", "", "Le vin blanc.", "White wine."],
+      ["gris", "grey", "", "Un chat gris.", "A grey cat."],
+      ["rose", "pink", "", "La vie en rose.", "Life through rose-coloured glasses."],
+      ["violet", "purple", "", "Des fleurs violettes.", "Purple flowers."],
+      ["marron", "brown", "", "Des chaussures marron.", "Brown shoes."],
+    ],
+    "Jours & mois": [
+      ["lundi", "Monday", "", "Lundi, je travaille.", "On Monday I work."],
+      ["mardi", "Tuesday", "", "Le cours est mardi.", "The class is on Tuesday."],
+      ["mercredi", "Wednesday", "", "À mercredi !", "See you Wednesday!"],
+      ["jeudi", "Thursday", "", "Jeudi soir, on sort.", "Thursday night we go out."],
+      ["vendredi", "Friday", "", "Enfin vendredi !", "Friday at last!"],
+      ["samedi", "Saturday", "", "Le marché est samedi.", "The market is on Saturday."],
+      ["dimanche", "Sunday", "", "Dimanche, on se repose.", "On Sunday we rest."],
+      ["janvier", "January", "", "Bonne année en janvier.", "Happy new year in January."],
+      ["juillet", "July", "", "Le 14 juillet est la fête nationale.", "July 14th is the national holiday."],
+      ["août", "August", "", "Paris est calme en août.", "Paris is quiet in August."],
+    ],
     "En ville": [
       ["la gare", "train station", "f", "La gare est à droite.", "The station is on the right."],
       ["la rue", "street", "f", "J'habite dans cette rue.", "I live on this street."],
@@ -273,7 +330,9 @@
   }
   function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {} }
 
-  const state = Object.assign({ deck: "Salutations", dir: "fr", boxes: {}, seen: 0 }, load());
+  const state = Object.assign({ deck: "Salutations", dir: "fr", mode: "flip", boxes: {}, seen: 0, streak: 0, best: 0 }, load());
+  if (state.mode !== "flip" && state.mode !== "type") state.mode = "flip";
+  state.streak = Math.max(0, Number(state.streak) || 0); state.best = Math.max(0, Number(state.best) || 0);
   if (!DECKS[state.deck]) state.deck = Object.keys(DECKS)[0];
   if (state.dir !== "fr" && state.dir !== "en") state.dir = "fr";
   if (!state.boxes || typeof state.boxes !== "object") state.boxes = {};
@@ -285,7 +344,7 @@
   };
 
   // ---- Session queue --------------------------------------------------------
-  let queue = [], total = 0, current = null, flipped = false;
+  let queue = [], total = 0, current = null, flipped = false, checked = false;
 
   function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
@@ -302,6 +361,7 @@
   function next() {
     flipped = false;
     $("card").classList.remove("flipped");
+    checked = false; $("feedback").hidden = true; $("guess").value = ""; // guardrail: never grade a stale answer
     current = queue.shift();
     const finished = current === undefined;
     $("studyArea").hidden = finished;
@@ -330,31 +390,97 @@
     const exBlock = `<div class="example">${esc(ex)}<span>${esc(exEn)}</span></div>`;
 
     if (state.dir === "fr") {
-      $("front").innerHTML = `<div class="top">${tag}${sayBtn}</div>${frBlock}${hint}`;
+      $("front").innerHTML = `<div class="top">${tag}${sayBtn}</div>${frBlock}${state.mode === "type" ? '<div class="hint">Type it in English</div>' : hint}`;
       $("back").innerHTML = `<div class="top">${tag}${sayBtn}</div><div class="word"><div class="hand">${esc(en)}</div><div class="sub">${esc(fr)}</div></div>${exBlock}`;
     } else {
-      $("front").innerHTML = `<div class="top">${tag}<span></span></div>${enBlock}<div class="hint">Say it in French, then flip</div>`;
+      $("front").innerHTML = `<div class="top">${tag}<span></span></div>${enBlock}<div class="hint">${state.mode === "type" ? "Type it in French" : "Say it in French, then flip"}</div>`;
       $("back").innerHTML = `<div class="top">${tag}${sayBtn}</div><div class="word"><div class="main">${esc(fr)}</div><div class="sub">${esc(en)}${g ? " · " + GENDER[g] : ""}</div></div>${exBlock}`;
     }
+    resetTyping();
+  }
+
+  function resetTyping() {
+    checked = false;
+    $("feedback").hidden = true;
+    $("guess").value = "";
+    $("guess").disabled = false;
+    $("check").textContent = "Check";
+    $("accents").hidden = state.dir !== "en";
+    if (state.mode === "type" && !matchMedia("(pointer: coarse)").matches) $("guess").focus({ preventScroll: true });
   }
 
   function flip() {
     if (current === undefined) return;
+    if (state.mode === "type" && !checked) { $("guess").focus(); return; } // guardrail: answer before peeking
     flipped = !flipped;
     $("card").classList.toggle("flipped", flipped);
     setButtons();
   }
 
   function answer(knew) {
-    if (current === undefined || !flipped) return; // guardrail: must look at the answer first
+    if (current === undefined || !flipped || state.mode === "type") return; // guardrail: must look at the answer first
+    record(knew);
+    advance();
+  }
+
+  function advance() {
+    flippedDelay = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 250;
+    next();
+  }
+
+  function record(knew) {
     const id = idOf(state.deck, current);
     const box = boxOf(state.deck, current);
     state.boxes[id] = knew ? Math.min(box + 1, BOX_COUNT) : 1;
     state.seen = (state.seen || 0) + 1;
     if (!knew) queue.splice(Math.min(3, queue.length), 0, current); // comes back a few cards later
+    state.streak = knew ? state.streak + 1 : 0;
+    state.best = Math.max(state.best, state.streak);
     save();
-    flippedDelay = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 250;
-    next();
+    if (knew) { const el = $("streak"); el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
+  }
+
+  // ---- Typing mode ---------------------------------------------------------
+  // Forgiving match: case, punctuation, articles ("le", "the", "to") and
+  // alternatives split by "/" are all accepted. Missing accents count as
+  // correct but get a gentle note.
+  function norm(s, keepAccents) {
+    let t = String(s).toLowerCase().replace(/[’`]/g, "'").replace(/\([^)]*\)/g, " ");
+    if (!keepAccents) t = t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/œ/g, "oe");
+    t = t.replace(/[^\p{L}\p{N}' -]/gu, " ").replace(/\s+/g, " ").trim();
+    return t.replace(/^(?:(?:le|la|les|un|une|des|du|the|a|an|to) |l')/, "").trim();
+  }
+  function accepted(target) {
+    const parts = String(target).split("/").map(x => x.trim()).filter(Boolean);
+    if (/\(e\)/.test(target)) parts.push(target.replace(/\(e\)/g, "e"));
+    return parts;
+  }
+
+  function check() {
+    if (current === undefined) return;
+    if (checked) { advance(); return; }
+    const raw = $("guess").value;
+    if (!raw.trim()) { $("guess").focus(); return; } // guardrail: empty answers aren't graded
+    const [fr, en] = DECKS[state.deck][current];
+    const target = state.dir === "fr" ? en : fr;
+    const opts = accepted(target);
+    const exact = opts.some(o => norm(o, true) === norm(raw, true));
+    const loose = exact || opts.some(o => norm(o) === norm(raw));
+    checked = true;
+    record(loose);
+    flipped = true; $("card").classList.add("flipped"); setButtons();
+    $("guess").disabled = true;
+    const fb = $("feedback");
+    fb.className = "feedback " + (loose ? "ok" : "no");
+    fb.innerHTML = (loose
+      ? (exact ? `<span><b>Correct !</b> ${esc(target)}</span>` : `<span><b>Correct</b> — watch the accents: <b>${esc(target)}</b></span>`)
+      : `<span><b>Pas tout à fait.</b> You wrote “${esc(raw.trim())}”, the answer is <b>${esc(target)}</b></span>`)
+      + `<button class="primary" type="button" id="nextBtn">Next card →</button>`;
+    fb.hidden = false;
+    $("nextBtn").onclick = advance;
+    $("check").textContent = "Next";
+    $("nextBtn").focus({ preventScroll: true });
+    renderMeta();
   }
 
   function setButtons() {
@@ -379,6 +505,11 @@
     document.querySelectorAll("#decks .chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.deck === state.deck)));
     $("dirFr").setAttribute("aria-pressed", String(state.dir === "fr"));
     $("dirEn").setAttribute("aria-pressed", String(state.dir === "en"));
+    $("modeFlip").setAttribute("aria-pressed", String(state.mode === "flip"));
+    $("modeType").setAttribute("aria-pressed", String(state.mode === "type"));
+    $("typeArea").hidden = state.mode !== "type";
+    $("flipArea").hidden = state.mode !== "flip";
+    $("streak").innerHTML = `<span class="label">Streak</span><b>${state.streak}</b><span class="stats">best ${state.best}</span>`;
   }
 
   // ---- Pronunciation (optional: works only where speechSynthesis exists) ---
@@ -405,6 +536,16 @@
   });
   $("dirFr").onclick = () => { state.dir = "fr"; save(); flippedDelay = 0; buildQueue(); };
   $("dirEn").onclick = () => { state.dir = "en"; save(); flippedDelay = 0; buildQueue(); };
+  $("modeFlip").onclick = () => { state.mode = "flip"; save(); flippedDelay = 0; buildQueue(); };
+  $("modeType").onclick = () => { state.mode = "type"; save(); flippedDelay = 0; buildQueue(); };
+  $("typeForm").addEventListener("submit", e => { e.preventDefault(); check(); });
+  $("accents").innerHTML = ["é","è","ê","à","â","ç","ô","î","û","ù","ë","ï","œ"].map(c => `<button type="button">${c}</button>`).join("");
+  $("accents").addEventListener("click", e => {
+    const b = e.target.closest("button"); const g = $("guess"); if (!b || g.disabled) return;
+    const s = g.selectionStart ?? g.value.length, t = g.selectionEnd ?? g.value.length;
+    g.value = g.value.slice(0, s) + b.textContent + g.value.slice(t);
+    g.focus(); g.setSelectionRange(s + 1, s + 1);
+  });
   $("shuffle").onclick = () => { flippedDelay = 0; buildQueue(); };
   $("restart").onclick = () => { flippedDelay = 0; buildQueue(); };
 
