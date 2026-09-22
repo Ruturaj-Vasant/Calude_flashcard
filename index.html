@@ -1,0 +1,442 @@
+<title>Cahier de Français</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&family=Caveat:wght@500;700&display=swap">
+<style>
+  :root {
+    --paper: #fbfaf6;
+    --paper-2: #f2f0f8;
+    --line: #d9d4ef;
+    --line-strong: #b7aee0;
+    --margin: #d2493f;
+    --ink: #1d3b8f;
+    --text: #22223a;
+    --muted: #6b6882;
+    --good: #2f7d4f;
+    --good-bg: #e3f2e8;
+    --again: #b8452f;
+    --again-bg: #f8e4df;
+    --shadow: 0 1px 0 rgba(40, 30, 90, .06), 0 10px 28px -12px rgba(40, 30, 90, .25);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper: #16172a; --paper-2: #1e2038; --line: #2c2e4d; --line-strong: #454878;
+      --margin: #e0675c; --ink: #9fb6ff; --text: #e8e7f3; --muted: #9a98b3;
+      --good: #7fcf9c; --good-bg: #1d3328; --again: #f0937f; --again-bg: #3a2320;
+      --shadow: 0 1px 0 rgba(0,0,0,.3), 0 12px 30px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #16172a; --paper-2: #1e2038; --line: #2c2e4d; --line-strong: #454878;
+    --margin: #e0675c; --ink: #9fb6ff; --text: #e8e7f3; --muted: #9a98b3;
+    --good: #7fcf9c; --good-bg: #1d3328; --again: #f0937f; --again-bg: #3a2320;
+    --shadow: 0 1px 0 rgba(0,0,0,.3), 0 12px 30px -12px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--text);
+    font: 15px/1.5 "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 0 16px;
+    padding-block: 28px 48px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; display: grid; gap: 22px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+  h1 {
+    font: 400 clamp(28px, 6vw, 40px)/1.05 "Young Serif", Georgia, serif;
+    margin: 0; color: var(--text); text-wrap: balance;
+  }
+  h1 em { font: 700 1.05em/1 "Caveat", cursive; color: var(--ink); font-style: normal; }
+  .stats { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; }
+  .stats b { color: var(--text); font-weight: 600; }
+
+  .label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+  .decks { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font: 500 14px/1 "Figtree", system-ui, sans-serif;
+    padding: 9px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line-strong); background: transparent; color: var(--text);
+  }
+  .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .chip:focus-visible, button:focus-visible { outline: 2px solid var(--margin); outline-offset: 2px; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+  .toggle { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
+  .toggle button { border: 0; background: transparent; color: var(--muted); padding: 8px 12px; font: 600 13px/1 "Figtree", sans-serif; cursor: pointer; }
+  .toggle button[aria-pressed="true"] { background: var(--paper-2); color: var(--ink); }
+  .ghost { border: 1px solid var(--line-strong); background: transparent; color: var(--text); border-radius: 8px; padding: 8px 12px; font: 500 13px/1 "Figtree", sans-serif; cursor: pointer; }
+
+  /* The card: a page of Seyès ruled notebook paper */
+  .stage { perspective: 1400px; }
+  .card {
+    position: relative; width: 100%; min-height: 330px;
+    transform-style: preserve-3d; transition: transform .5s cubic-bezier(.3,.7,.2,1);
+    cursor: pointer; border: 0; padding: 0; background: none; color: inherit; text-align: left; display: block;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: 6px; box-shadow: var(--shadow); overflow: hidden;
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(to right, transparent 54px, var(--margin) 54px, var(--margin) 56px, transparent 56px),
+      repeating-linear-gradient(to bottom, transparent 0 31px, var(--line-strong) 31px 32px),
+      repeating-linear-gradient(to bottom, transparent 0 7px, var(--line) 7px 8px),
+      repeating-linear-gradient(to right, transparent 0 31px, var(--line) 31px 32px);
+    border: 1px solid var(--line);
+    display: grid; grid-template-rows: auto 1fr auto; padding: 18px 20px 18px 74px; gap: 8px;
+  }
+  .back { transform: rotateY(180deg); }
+  .face .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .tag { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--paper); padding: 2px 6px; border-radius: 4px; }
+  .word { align-self: center; display: grid; gap: 6px; }
+  .word .main { font: 400 clamp(30px, 7vw, 46px)/1.1 "Young Serif", Georgia, serif; color: var(--text); overflow-wrap: anywhere; }
+  .word .hand { font: 700 clamp(34px, 8vw, 52px)/1 "Caveat", cursive; color: var(--ink); overflow-wrap: anywhere; }
+  .word .sub { font-size: 14px; color: var(--muted); }
+  .example { font: 500 20px/1.3 "Caveat", cursive; color: var(--ink); background: var(--paper); padding: 2px 6px; border-radius: 4px; justify-self: start; }
+  .example span { display: block; font: 400 13px/1.4 "Figtree", sans-serif; color: var(--muted); }
+  .hint { font-size: 12px; color: var(--muted); background: var(--paper); padding: 2px 6px; border-radius: 4px; justify-self: start; }
+  .say {
+    border: 1px solid var(--line-strong); background: var(--paper); color: var(--ink);
+    border-radius: 999px; width: 36px; height: 36px; display: grid; place-items: center; cursor: pointer;
+  }
+  .say svg { width: 18px; height: 18px; }
+
+  .answer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .answer button {
+    border-radius: 10px; padding: 14px; font: 600 15px/1.2 "Figtree", sans-serif; cursor: pointer; border: 1px solid transparent;
+    display: grid; gap: 2px; justify-items: center;
+  }
+  .answer button small { font-weight: 400; font-size: 12px; opacity: .8; }
+  .again { background: var(--again-bg); color: var(--again); border-color: var(--again) !important; }
+  .know { background: var(--good-bg); color: var(--good); border-color: var(--good) !important; }
+  .answer button:disabled { opacity: .45; cursor: not-allowed; }
+
+  .progress { height: 6px; background: var(--paper-2); border-radius: 999px; overflow: hidden; border: 1px solid var(--line); }
+  .progress i { display: block; height: 100%; background: var(--ink); width: 0; transition: width .3s; }
+
+  .boxes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .box { text-align: center; padding: 8px 4px; border-radius: 8px; background: var(--paper-2); font-variant-numeric: tabular-nums; }
+  .box b { display: block; font: 400 20px/1.1 "Young Serif", Georgia, serif; color: var(--ink); }
+  .box span { font-size: 11px; color: var(--muted); }
+
+  .done { text-align: center; padding: 40px 16px; border: 1px dashed var(--line-strong); border-radius: 10px; display: grid; gap: 10px; justify-items: center; }
+  .done h2 { font: 700 38px/1 "Caveat", cursive; color: var(--ink); margin: 0; }
+  .done p { margin: 0; color: var(--muted); max-width: 44ch; }
+
+  footer { color: var(--muted); font-size: 12px; }
+  kbd { font: 600 11px/1 ui-monospace, monospace; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; padding: 2px 5px; }
+
+  @media (max-width: 480px) {
+    .face { padding-left: 64px; }
+    .face { background-image:
+      linear-gradient(to right, transparent 46px, var(--margin) 46px, var(--margin) 48px, transparent 48px),
+      repeating-linear-gradient(to bottom, transparent 0 31px, var(--line-strong) 31px 32px),
+      repeating-linear-gradient(to bottom, transparent 0 7px, var(--line) 7px 8px),
+      repeating-linear-gradient(to right, transparent 0 31px, var(--line) 31px 32px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .card, .progress i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Cahier de <em>français</em></h1>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <section style="display:grid;gap:10px">
+    <div class="label">Pick a deck</div>
+    <div class="decks" id="decks" role="group" aria-label="Decks"></div>
+  </section>
+
+  <div class="controls">
+    <div class="toggle" role="group" aria-label="Direction">
+      <button id="dirFr" aria-pressed="true">Français → English</button>
+      <button id="dirEn" aria-pressed="false">English → Français</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="ghost" id="shuffle">Shuffle</button>
+      <button class="ghost" id="reset">Reset progress</button>
+    </div>
+  </div>
+
+  <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+
+  <div id="studyArea" style="display:grid;gap:14px">
+    <div class="stage">
+      <button class="card" id="card" aria-live="polite" aria-label="Flashcard, press to flip">
+        <div class="face front" id="front"></div>
+        <div class="face back" id="back"></div>
+      </button>
+    </div>
+    <div class="answer">
+      <button class="again" id="again" disabled>À revoir<small>Show me again · <kbd>1</kbd></small></button>
+      <button class="know" id="know" disabled>Je sais !<small>Move it up a box · <kbd>2</kbd></small></button>
+    </div>
+  </div>
+
+  <div class="done" id="done" hidden>
+    <h2>Bravo !</h2>
+    <p id="doneMsg"></p>
+    <button class="ghost" id="restart">Study this deck again</button>
+  </div>
+
+  <section style="display:grid;gap:8px">
+    <div class="label">Leitner boxes · this deck</div>
+    <div class="boxes" id="boxes"></div>
+  </section>
+
+  <footer>Tap the card or press <kbd>Space</kbd> to flip · <kbd>1</kbd> / <kbd>2</kbd> to answer · <kbd>S</kbd> to hear it. Cards you know move up a box and show up less often.</footer>
+</div>
+
+<script>
+(() => {
+  // ---- Vocabulary ----------------------------------------------------------
+  // g: m = masculine, f = feminine, p = plural (shown as a hint for nouns)
+  const DECKS = {
+    "Salutations": [
+      ["Bonjour", "Hello / Good morning", "", "Bonjour, madame !", "Hello, ma'am!"],
+      ["Bonsoir", "Good evening", "", "Bonsoir, tout le monde.", "Good evening, everyone."],
+      ["Salut", "Hi / Bye (informal)", "", "Salut, ça va ?", "Hi, how's it going?"],
+      ["Au revoir", "Goodbye", "", "Au revoir et à demain.", "Goodbye, see you tomorrow."],
+      ["Merci", "Thank you", "", "Merci beaucoup !", "Thank you very much!"],
+      ["S'il vous plaît", "Please (formal)", "", "Un café, s'il vous plaît.", "A coffee, please."],
+      ["De rien", "You're welcome", "", "— Merci ! — De rien.", "— Thanks! — You're welcome."],
+      ["Excusez-moi", "Excuse me", "", "Excusez-moi, où est la gare ?", "Excuse me, where is the station?"],
+      ["Comment ça va ?", "How are you?", "", "Salut Paul, comment ça va ?", "Hi Paul, how are you?"],
+      ["Enchanté(e)", "Nice to meet you", "", "Enchantée, je m'appelle Léa.", "Nice to meet you, I'm Léa."],
+    ],
+    "Nourriture": [
+      ["le pain", "bread", "m", "J'achète du pain à la boulangerie.", "I buy bread at the bakery."],
+      ["le fromage", "cheese", "m", "La France a plus de mille fromages.", "France has over a thousand cheeses."],
+      ["la pomme", "apple", "f", "Je mange une pomme.", "I'm eating an apple."],
+      ["l'eau", "water", "f", "Une carafe d'eau, s'il vous plaît.", "A jug of water, please."],
+      ["le vin", "wine", "m", "Un verre de vin rouge.", "A glass of red wine."],
+      ["le poulet", "chicken", "m", "Le poulet est délicieux.", "The chicken is delicious."],
+      ["la fraise", "strawberry", "f", "J'adore les fraises.", "I love strawberries."],
+      ["le petit-déjeuner", "breakfast", "m", "Le petit-déjeuner est prêt.", "Breakfast is ready."],
+      ["l'addition", "the bill (restaurant)", "f", "L'addition, s'il vous plaît.", "The bill, please."],
+      ["le beurre", "butter", "m", "Du pain avec du beurre.", "Bread with butter."],
+    ],
+    "Nombres": [
+      ["un", "one", "", "J'ai un chat.", "I have one cat."],
+      ["deux", "two", "", "Deux cafés, s'il vous plaît.", "Two coffees, please."],
+      ["trois", "three", "", "Il est trois heures.", "It's three o'clock."],
+      ["cinq", "five", "", "Cinq euros.", "Five euros."],
+      ["dix", "ten", "", "Dix minutes à pied.", "Ten minutes on foot."],
+      ["vingt", "twenty", "", "J'ai vingt ans.", "I'm twenty years old."],
+      ["soixante-dix", "seventy (60 + 10)", "", "Soixante-dix pour cent.", "Seventy percent."],
+      ["quatre-vingts", "eighty (4 × 20)", "", "Quatre-vingts kilomètres.", "Eighty kilometers."],
+      ["quatre-vingt-dix", "ninety (4 × 20 + 10)", "", "Ma grand-mère a quatre-vingt-dix ans.", "My grandmother is ninety."],
+      ["cent", "one hundred", "", "Cent pour cent d'accord.", "A hundred percent agreed."],
+    ],
+    "Verbes": [
+      ["être", "to be", "", "Je suis étudiant.", "I am a student."],
+      ["avoir", "to have", "", "Nous avons faim.", "We are hungry (lit. have hunger)."],
+      ["aller", "to go", "", "Je vais à Paris.", "I'm going to Paris."],
+      ["faire", "to do / to make", "", "Il fait beau aujourd'hui.", "The weather is nice today."],
+      ["parler", "to speak", "", "Tu parles français ?", "Do you speak French?"],
+      ["manger", "to eat", "", "On mange à midi.", "We eat at noon."],
+      ["vouloir", "to want", "", "Je voudrais un croissant.", "I would like a croissant."],
+      ["pouvoir", "to be able to / can", "", "Tu peux m'aider ?", "Can you help me?"],
+      ["savoir", "to know (a fact)", "", "Je ne sais pas.", "I don't know."],
+      ["prendre", "to take", "", "Je prends le métro.", "I take the metro."],
+    ],
+    "En ville": [
+      ["la gare", "train station", "f", "La gare est à droite.", "The station is on the right."],
+      ["la rue", "street", "f", "J'habite dans cette rue.", "I live on this street."],
+      ["le musée", "museum", "m", "Le musée ouvre à neuf heures.", "The museum opens at nine."],
+      ["la bibliothèque", "library", "f", "Je travaille à la bibliothèque.", "I work at the library."],
+      ["le métro", "subway", "m", "Le métro est rapide.", "The subway is fast."],
+      ["à gauche", "to the left", "", "Tournez à gauche.", "Turn left."],
+      ["tout droit", "straight ahead", "", "Allez tout droit.", "Go straight ahead."],
+      ["la pharmacie", "pharmacy", "f", "Où est la pharmacie ?", "Where is the pharmacy?"],
+      ["le billet", "ticket", "m", "Un billet pour Lyon.", "A ticket to Lyon."],
+      ["l'hôpital", "hospital", "m", "L'hôpital est près d'ici.", "The hospital is near here."],
+    ],
+  };
+  const GENDER = { m: "masculine", f: "feminine", p: "plural" };
+  const BOX_COUNT = 5;
+  const STORE_KEY = "cahier-fr-v1";
+
+  // ---- Safe storage (guardrail: never let storage errors break the app) ----
+  function load() {
+    try { const raw = localStorage.getItem(STORE_KEY); const v = raw ? JSON.parse(raw) : null; return v && typeof v === "object" ? v : {}; }
+    catch { return {}; }
+  }
+  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {} }
+
+  const state = Object.assign({ deck: "Salutations", dir: "fr", boxes: {}, seen: 0 }, load());
+  if (!DECKS[state.deck]) state.deck = Object.keys(DECKS)[0];
+  if (state.dir !== "fr" && state.dir !== "en") state.dir = "fr";
+  if (!state.boxes || typeof state.boxes !== "object") state.boxes = {};
+
+  const idOf = (deck, i) => deck + "::" + DECKS[deck][i][0];
+  const boxOf = (deck, i) => {
+    const b = Number(state.boxes[idOf(deck, i)]);
+    return Number.isInteger(b) && b >= 1 && b <= BOX_COUNT ? b : 1;
+  };
+
+  // ---- Session queue --------------------------------------------------------
+  let queue = [], total = 0, current = null, flipped = false;
+
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  function buildQueue() {
+    // Lower boxes first; box 5 ("mastered") only if everything else is done.
+    const cards = DECKS[state.deck].map((_, i) => i);
+    let pending = cards.filter(i => boxOf(state.deck, i) < BOX_COUNT);
+    if (!pending.length) pending = cards.slice();
+    queue = shuffle(pending).sort((a, b) => boxOf(state.deck, a) - boxOf(state.deck, b));
+    total = queue.length;
+    next();
+  }
+
+  function next() {
+    flipped = false;
+    $("card").classList.remove("flipped");
+    current = queue.shift();
+    const finished = current === undefined;
+    $("studyArea").hidden = finished;
+    $("done").hidden = !finished;
+    if (finished) {
+      const mastered = DECKS[state.deck].filter((_, i) => boxOf(state.deck, i) === BOX_COUNT).length;
+      $("doneMsg").textContent = `You went through every card in “${state.deck}”. ${mastered} of ${DECKS[state.deck].length} are in the top box.`;
+    } else {
+      // Wait for the flip-back animation before swapping text so the answer never flashes.
+      setTimeout(renderCard, flippedDelay);
+    }
+    setButtons();
+    renderMeta();
+  }
+  let flippedDelay = 0;
+
+  function renderCard() {
+    if (current === undefined) return;
+    const [fr, en, g, ex, exEn] = DECKS[state.deck][current];
+    const box = boxOf(state.deck, current);
+    const hint = g ? `<div class="hint">${GENDER[g]} noun</div>` : `<div></div>`;
+    const sayBtn = `<span class="say" role="button" tabindex="0" data-say aria-label="Hear it in French"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg></span>`;
+    const tag = `<span class="tag">${esc(state.deck)} · box ${box}</span>`;
+    const frBlock = `<div class="word"><div class="main">${esc(fr)}</div></div>`;
+    const enBlock = `<div class="word"><div class="hand">${esc(en)}</div></div>`;
+    const exBlock = `<div class="example">${esc(ex)}<span>${esc(exEn)}</span></div>`;
+
+    if (state.dir === "fr") {
+      $("front").innerHTML = `<div class="top">${tag}${sayBtn}</div>${frBlock}${hint}`;
+      $("back").innerHTML = `<div class="top">${tag}${sayBtn}</div><div class="word"><div class="hand">${esc(en)}</div><div class="sub">${esc(fr)}</div></div>${exBlock}`;
+    } else {
+      $("front").innerHTML = `<div class="top">${tag}<span></span></div>${enBlock}<div class="hint">Say it in French, then flip</div>`;
+      $("back").innerHTML = `<div class="top">${tag}${sayBtn}</div><div class="word"><div class="main">${esc(fr)}</div><div class="sub">${esc(en)}${g ? " · " + GENDER[g] : ""}</div></div>${exBlock}`;
+    }
+  }
+
+  function flip() {
+    if (current === undefined) return;
+    flipped = !flipped;
+    $("card").classList.toggle("flipped", flipped);
+    setButtons();
+  }
+
+  function answer(knew) {
+    if (current === undefined || !flipped) return; // guardrail: must look at the answer first
+    const id = idOf(state.deck, current);
+    const box = boxOf(state.deck, current);
+    state.boxes[id] = knew ? Math.min(box + 1, BOX_COUNT) : 1;
+    state.seen = (state.seen || 0) + 1;
+    if (!knew) queue.splice(Math.min(3, queue.length), 0, current); // comes back a few cards later
+    save();
+    flippedDelay = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 250;
+    next();
+  }
+
+  function setButtons() {
+    $("again").disabled = !flipped;
+    $("know").disabled = !flipped;
+  }
+
+  function renderMeta() {
+    const deck = DECKS[state.deck];
+    const counts = Array(BOX_COUNT).fill(0);
+    deck.forEach((_, i) => counts[boxOf(state.deck, i) - 1]++);
+    const labels = ["new", "learning", "familiar", "solid", "mastered"];
+    $("boxes").innerHTML = counts.map((c, i) => `<div class="box"><b>${c}</b><span>${labels[i]}</span></div>`).join("");
+
+    const done = total - queue.length - (current === undefined ? 0 : 1);
+    $("bar").style.width = total ? Math.max(0, Math.min(100, (done / total) * 100)) + "%" : "0%";
+
+    const allCards = Object.keys(DECKS).reduce((n, d) => n + DECKS[d].length, 0);
+    const mastered = Object.values(state.boxes).filter(b => b === BOX_COUNT).length;
+    $("stats").innerHTML = `<b>${Math.max(0, total - done)}</b> left in session · <b>${mastered}</b>/${allCards} mastered`;
+
+    document.querySelectorAll("#decks .chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.deck === state.deck)));
+    $("dirFr").setAttribute("aria-pressed", String(state.dir === "fr"));
+    $("dirEn").setAttribute("aria-pressed", String(state.dir === "en"));
+  }
+
+  // ---- Pronunciation (optional: works only where speechSynthesis exists) ---
+  function speak() {
+    if (current === undefined) return;
+    try {
+      if (!("speechSynthesis" in window)) return;
+      const u = new SpeechSynthesisUtterance(DECKS[state.deck][current][0]);
+      u.lang = "fr-FR"; u.rate = 0.9;
+      const fr = speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith("fr"));
+      if (fr) u.voice = fr;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } catch {}
+  }
+
+  // ---- Helpers & wiring ----------------------------------------------------
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+  $("decks").innerHTML = Object.keys(DECKS).map(d => `<button class="chip" data-deck="${esc(d)}" aria-pressed="false">${esc(d)}</button>`).join("");
+  $("decks").addEventListener("click", e => {
+    const b = e.target.closest(".chip"); if (!b || !DECKS[b.dataset.deck]) return;
+    state.deck = b.dataset.deck; save(); flippedDelay = 0; buildQueue();
+  });
+  $("dirFr").onclick = () => { state.dir = "fr"; save(); flippedDelay = 0; buildQueue(); };
+  $("dirEn").onclick = () => { state.dir = "en"; save(); flippedDelay = 0; buildQueue(); };
+  $("shuffle").onclick = () => { flippedDelay = 0; buildQueue(); };
+  $("restart").onclick = () => { flippedDelay = 0; buildQueue(); };
+
+  let resetArmed = false, resetTimer;
+  $("reset").onclick = () => {
+    // Guardrail: two-step confirm (native confirm() is unavailable in some viewers)
+    if (!resetArmed) {
+      resetArmed = true; $("reset").textContent = "Tap again to erase";
+      clearTimeout(resetTimer); resetTimer = setTimeout(() => { resetArmed = false; $("reset").textContent = "Reset progress"; }, 3000);
+      return;
+    }
+    resetArmed = false; $("reset").textContent = "Reset progress";
+    state.boxes = {}; state.seen = 0; save(); flippedDelay = 0; buildQueue();
+  };
+
+  $("card").addEventListener("click", e => {
+    if (e.target.closest("[data-say]")) { e.stopPropagation(); speak(); return; }
+    flip();
+  });
+  $("again").onclick = () => answer(false);
+  $("know").onclick = () => answer(true);
+
+  document.addEventListener("keydown", e => {
+    if (e.target.closest && e.target.closest("input, textarea")) return;
+    if (e.key === " " || e.key === "Enter") {
+      if (e.target.closest && e.target.closest("button:not(#card)")) return;
+      e.preventDefault(); flip();
+    } else if (e.key === "1") answer(false);
+    else if (e.key === "2") answer(true);
+    else if (e.key.toLowerCase() === "s") speak();
+  });
+
+  buildQueue();
+})();
+</script>
